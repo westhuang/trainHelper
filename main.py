@@ -1,5 +1,8 @@
 import requests
+from flask import Flask, request, jsonify
 import json
+
+app = Flask(__name__)
 
 # 站点名称和编码的映射关系
 station_mapping = {"北京北": "VAP", "北京东": "BOP", "北京": "BJP", "北京南": "VNP", "北京西": "BXP", "广州南": "IZQ",
@@ -801,6 +804,7 @@ def print_ticket_info_for_train(train_name, from_station_code, to_station_code, 
                 train_info = train.split('|')
                 if train_name in train_info:
                     print(train_info[2], "软卧：", train_info[23], "硬卧：", train_info[28], "硬座：", train_info[29])
+                    return train_info[2] + " 软卧：" + train_info[23] + " 硬卧：" + train_info[28] + " 硬座：" + train_info[29]
         else:
             print(f"Unexpected response format: {response.content}")
             return None
@@ -836,7 +840,7 @@ def get_valid_station_pair(from_city_name, to_city_name, station_order_list):
     return valid_station_pairs
 
 
-def main(from_city, to_city, train_name, date):
+def query_kuazhan_train_ticket(from_city, to_city, train_name, date):
     train_no, from_station_telecode, to_station_telecode = get_train_no(from_city, to_city, train_name, date)
     if not train_no:
         print(f"Train {train_name} not found")
@@ -858,6 +862,7 @@ def main(from_city, to_city, train_name, date):
     valid_station_pairs = get_valid_station_pair(from_city_name, to_city_name, station_order_list)
     print(valid_station_pairs)
 
+    kuazhan_ticket_list = []
     for valid_station_pair in valid_station_pairs:
         # 打印每个元组的第一和第二个元素
         print(f"\n出发车站: {valid_station_pair[0]}, 达到车站: {valid_station_pair[1]}")
@@ -865,12 +870,41 @@ def main(from_city, to_city, train_name, date):
         from_station_code = station_mapping[valid_station_pair[0]]
         to_station_code = station_mapping[valid_station_pair[1]]
 
-        print_ticket_info_for_train(train_name, from_station_code, to_station_code, date)
+        print_result = print_ticket_info_for_train(train_name, from_station_code, to_station_code, date)
+        if print_result:
+            kuazhan_ticket_list.append(print_result)
+
+    return kuazhan_ticket_list
 
 
-if __name__ == "__main__":
-    from_city = "杭州"
-    to_city = "赣州"
-    train_name = "K469"  # 期望车次名称
-    date = "2023-12-28"
-    main(from_city, to_city, train_name, date)
+# if __name__ == "__main__":
+#     from_city = "杭州"
+#     to_city = "赣州"
+#     train_name = "K469"  # 期望车次名称
+#     date = "2023-12-28"
+#     main(from_city, to_city, train_name, date)
+
+@app.route('/kuazhan_train_ticket', methods=['POST'])
+def kuazhan_train_ticket():
+    # 获取请求中的参数
+    data = request.get_json()
+
+    # 检查是否有四个字符串参数
+    if 'from_city' not in data or 'to_city' not in data or 'train_name' not in data or 'date' not in data:
+        return jsonify({'error': 'Missing parameters'}), 400
+
+    # 获取参数的值
+    from_city = data['from_city']
+    to_city = data['to_city']
+    train_name = data['train_name']
+    date = data['date']
+
+    # 在这里执行你的逻辑，生成字符串数组
+    result_array = query_kuazhan_train_ticket(from_city, to_city, train_name, date)
+
+    # 返回字符串数组
+    tickets_result = json.dumps({'result': result_array}, ensure_ascii=False)
+    return tickets_result;
+
+if __name__ == '__main__':
+    app.run(port=5000)
