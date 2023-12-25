@@ -155,6 +155,7 @@ def print_ticket_info_for_train(train_name, from_station_code, to_station_code, 
             for train in trains:
                 train_info = train.split('|')
                 if train_name in train_info:
+                    # todo 动车数据
                     print(f"车次: {train_info[2]}, 软卧: {train_info[23]}, 硬卧: {train_info[28]}, 硬座: {train_info[29]}\n")
                     return "软卧：" + train_info[23] + " 硬卧：" + train_info[28] + " 硬座：" + train_info[29]
         else:
