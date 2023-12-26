@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -281,7 +283,7 @@ def kuazhan_train_ticket():
 
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(host='0.0.0.0', port=5000)
 
     # if __name__ == "__main__":
     #     from_city = "杭州"

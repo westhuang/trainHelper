@@ -25,8 +25,27 @@
 
     <div id="result"></div>
 
+    <div id="loading" style="display: none;">正在查询，请等待<span id="dots"></span></div>
+
     <script>
         function submitForm() {
+            var loadingDotsInterval;
+            var dotCount = 0;
+            // 显示加载提示
+            function showLoadingDots() {
+                document.getElementById('loading').style.display = 'block';
+                loadingDotsInterval = setInterval(function() {
+                    dotCount = (dotCount + 1) % 4;
+                    var dots = '.'.repeat(dotCount);
+                    document.getElementById('dots').textContent = dots;
+                }, 500); // 500毫秒更新一次点的数量
+            }
+            // 隐藏加载提示
+            function hideLoading() {
+                clearInterval(loadingDotsInterval);
+                document.getElementById('loading').style.display = 'none';
+            }
+
             // 获取表单数据
             var formData = {
                 from_city: document.getElementById('fromCity').value,
@@ -35,7 +54,11 @@
                 date: document.getElementById('travelDate').value
             };
 
+            // 显示加载提示
+            showLoadingDots();
+
             // 发送POST请求
+            // fetch('http://47.245.110.70:5000/kuazhan_train_ticket', {
             fetch('http://localhost:5000/kuazhan_train_ticket', {
                 method: 'POST',
                 headers: {
@@ -45,6 +68,9 @@
             })
             .then(response => response.json())
             .then(data => {
+                // 隐藏加载提示
+                hideLoading();
+
                 if (data.success) {
                     // 接口调用成功
                     displayResults(data.train_list);
@@ -55,6 +81,7 @@
             })
             .catch(error => {
                 // 网络错误等异常情况
+                hideLoading();
                 displayError('抱歉，目前服务器关闭了');
             });
         }
