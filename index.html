@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跨站火车余票查询</title>
+</head>
+<body>
+    <h1>跨站火车余票查询</h1>
+    <form id="ticketForm">
+        <label for="fromCity">出发城市:</label>
+        <input type="text" id="fromCity" name="from_city" value="杭州" required><br>
+
+        <label for="toCity">到达城市:</label>
+        <input type="text" id="toCity" name="to_city" value="赣州" required><br>
+
+        <label for="trainName">期望车次:</label>
+        <input type="text" id="trainName" name="train_name" value="K469" required><br>
+
+        <label for="travelDate">乘坐日期:</label>
+        <input type="date" id="travelDate" name="date" required><br>
+
+        <button type="button" onclick="submitForm()">查询</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        function submitForm() {
+            // 获取表单数据
+            var formData = {
+                from_city: document.getElementById('fromCity').value,
+                to_city: document.getElementById('toCity').value,
+                train_name: document.getElementById('trainName').value,
+                date: document.getElementById('travelDate').value
+            };
+
+            // 发送POST请求
+            fetch('http://localhost:5000/kuazhan_train_ticket', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 接口调用成功
+                    displayResults(data.train_list);
+                } else {
+                    // 接口调用失败，显示错误信息
+                    displayError(data.err_msg);
+                }
+            })
+            .catch(error => {
+                // 网络错误等异常情况
+                displayError('抱歉，目前服务器关闭了');
+            });
+        }
+
+        function displayResults(trainList) {
+            // 清空之前的结果
+            document.getElementById('result').innerHTML = '';
+
+            // 显示结果
+            trainList.forEach(train => {
+                var trainResult = document.createElement('p');
+                trainResult.textContent = train;
+                document.getElementById('result').appendChild(trainResult);
+            });
+        }
+
+        function displayError(errorMessage) {
+            // 显示错误信息
+            document.getElementById('result').innerHTML = errorMessage;
+        }
+    </script>
+</body>
+</html>
