@@ -59,7 +59,7 @@ def get_train_no(from_city, to_city, train_name, date):
         "x-air-gray": "true"
     }
 
-    url = "https://kyfw.12306.cn/otn/leftTicket/query"
+    url = "https://kyfw.12306.cn/otn/leftTicket/queryE"
     params = {
         "leftTicketDTO.train_date": date,
         "leftTicketDTO.from_station": from_station_code,
@@ -157,7 +157,7 @@ def print_ticket_info_for_train(train_name, from_station_code, to_station_code, 
         "x-air-gray": "true"
     }
 
-    url = "https://kyfw.12306.cn/otn/leftTicket/query"
+    url = "https://kyfw.12306.cn/otn/leftTicket/queryE"
     params = {
         "leftTicketDTO.train_date": date,
         "leftTicketDTO.from_station": from_station_code,
